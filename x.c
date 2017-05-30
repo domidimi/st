@@ -637,6 +637,8 @@ void
 xsetsel(char *str)
 {
 	setsel(str, CurrentTime);
+
+	xclipcopy();
 }
 
 void
