@@ -170,6 +170,18 @@ MouseKey mkeys[] = {
 #define MODKEY Mod1Mask
 #define TERMMOD (ControlMask|ShiftMask)
 
+static char *copy_word_cmd[] = {"n", "/bin/sh", "-c",
+	"xfiles | dmenu -i -l 10 | tr -d '\\n' | xsel -i -b",
+	NULL };
+static char *insert_words_cmd[] = { "p", "/bin/sh", "-c",
+	"xfiles | dmenu -i -l 10 | tr -d '\\n'",
+	NULL };
+static char *copy_line_cmd[] = { "n", "/bin/sh", "-c",
+	"xlines | dmenu -i -l 10 | tr -d '\\n' | xsel -i -b",
+	NULL };
+static char *edit_buf_cmd[] = { "n", "vim", "-",
+	NULL };
+
 static Shortcut shortcuts[] = {
 	/* mask                 keysym          function        argument */
 	{ XK_ANY_MOD,           XK_Break,       sendbreak,      {.i =  0} },
@@ -186,6 +198,10 @@ static Shortcut shortcuts[] = {
 	{ TERMMOD,              XK_I,           iso14755,       {.i =  0} },
 	{ ShiftMask,            XK_Page_Up,     kscrollup,      {.i = -1} },
 	{ ShiftMask,            XK_Page_Down,   kscrolldown,    {.i = -1} },
+	{ MODKEY, 'c', externalpipe, { .v=copy_word_cmd }},
+	{ MODKEY, 'd', externalpipe, { .v=insert_words_cmd }},
+	{ MODKEY, 'l', externalpipe, { .v=copy_line_cmd }},
+	{ MODKEY, 'e', externalpipe, { .v=edit_buf_cmd }},
 };
 
 /*
