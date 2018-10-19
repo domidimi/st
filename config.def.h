@@ -5,7 +5,10 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "TamzenForPowerline:size=10:antialias=false:autohint=false,Terminus:size=10";
+ /*static char *font = "TamzenForPowerline:size=10:antialias=false:autohint=false,xos4 Terminus:size=9";*/
+ static char *font = "Input Mono:pixelsize=11:antialias=false:autohint=false";
+/* static char *font = "xos4 Terminus:size=9:antialias=false:autohint=false";*/
+/* static char *font = "Terminus (TTF)";*/
 static int borderpx = 2;
 
 /*
@@ -113,7 +116,7 @@ static const char *colorname[] = {
  * Default colors (colorname index)
  * foreground, background, cursor, reverse cursor
  */
-unsigned int defaultfg = 15;
+unsigned int defaultfg = 7;
 unsigned int defaultbg = 0;
 static unsigned int defaultcs = 256;
 static unsigned int defaultrcs = 257;
