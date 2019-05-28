@@ -130,7 +130,7 @@ void kscrollup(const Arg *);
 extern char *utmp;
 extern char *stty_args;
 extern char *vtiden;
-extern wchar_t *worddelimiters;
+extern const wchar_t *worddelimiters;
 extern int allowaltscreen;
 extern char *termname;
 extern unsigned int tabspaces;

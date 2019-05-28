@@ -5,8 +5,17 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
- /*static char *font = "TamzenForPowerline:size=10:antialias=false:autohint=false,xos4 Terminus:size=9";*/
- static char *font = "Input Mono:pixelsize=11:antialias=false:autohint=false";
+static char *font = "TamzenForPowerline:size=10:antialias=false:autohint=false,Terminus:size=9";
+
+/* Spare fonts */
+static char *font2[] = {
+    "Terminus:size=9:antialias=false:autohint=false",
+    "Hack:size=8:antialias=false:autohint=false",
+/*"Inconsolata for Powerline:pixelsize=12:antialias=true:autohint=true", */
+/*"Hack Nerd Font Mono:pixelsize=11:antialias=true:autohint=true", */
+};
+
+/* static char *font = "Input Mono:pixelsize=10:antialias=false:autohint=false";*/
 /* static char *font = "xos4 Terminus:size=9:antialias=false:autohint=false";*/
 /* static char *font = "Terminus (TTF)";*/
 static int borderpx = 2;
@@ -33,9 +42,9 @@ static float chscale = 1.0;
 /*
  * word delimiter string
  *
- * More advanced example: L" `'\"()[]{}"
+ * More advanced example: " `'\"()[]{}"
  */
-wchar_t *worddelimiters = L" ";
+const wchar_t *worddelimiters = (wchar_t *)" ";
 
 /* selection timeouts (in milliseconds) */
 static unsigned int doubleclicktimeout = 300;
@@ -169,18 +178,22 @@ MouseKey mkeys[] = {
 /* Internal keyboard shortcuts. */
 #define MODKEY Mod1Mask
 #define TERMMOD (ControlMask|ShiftMask)
+extern char *cwd;
 
+/*dmenu -i -l 10*/
 static char *copy_word_cmd[] = {"n", "/bin/sh", "-c",
-	"xfiles | dmenu -i -l 10 | tr -d '\\n' | xsel -i -b",
+	"xfiles | dmenu -i -l 10 | xsel -i -b",
 	NULL };
 static char *insert_words_cmd[] = { "p", "/bin/sh", "-c",
-	"xfiles | dmenu -i -l 10 | tr -d '\\n'",
+	"xfiles | dmenu -i -l 10 ",
 	NULL };
+/* "xlines | rofi -dmenu -matching fuzzy -i | tr -d '\\n' | xsel -i -b",*/
 static char *copy_line_cmd[] = { "n", "/bin/sh", "-c",
-	"xlines | dmenu -i -l 10 | tr -d '\\n' | xsel -i -b",
+	"xlines | dmenu -b -i | tr -d '\\n' | xsel -i -b",
 	NULL };
-static char *edit_buf_cmd[] = { "n", "gvim", "-",
-	NULL };
+
+static char *edit_buf_cmd[] = { "n", "gvim", "-", NULL };
+static char *plumber_cmd[] = { "n", "/bin/sh", "-c", "xfiles | rofi -dmenu -matching fuzzy -i | plumb", NULL };
 
 static Shortcut shortcuts[] = {
 	/* mask                 keysym          function        argument */
@@ -202,6 +215,7 @@ static Shortcut shortcuts[] = {
 	{ MODKEY, 'd', externalpipe, { .v=insert_words_cmd }},
 	{ MODKEY, 'l', externalpipe, { .v=copy_line_cmd }},
 	{ MODKEY, 'e', externalpipe, { .v=edit_buf_cmd }},
+        { MODKEY, XK_o, externalpipe, {.v=plumber_cmd } },
 };
 
 /*
