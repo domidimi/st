@@ -115,6 +115,7 @@ typedef struct {
 typedef struct {
 	int row;      /* nb row */
 	int col;      /* nb col */
+	int maxcol;   /* maximum of col during terminal lifetime */
 	Line *line;   /* screen */
 	Line *alt;    /* alternate screen */
 	Line hist[HISTSIZE]; /* history buffer */
@@ -1283,8 +1284,10 @@ tclearregion(int x1, int y1, int x2, int y2)
 	if (y1 > y2)
 		temp = y1, y1 = y2, y2 = temp;
 
-	LIMIT(x1, 0, term.col-1);
-	LIMIT(x2, 0, term.col-1);
+	// LIMIT(x1, 0, term.col-1);
+	// LIMIT(x2, 0, term.col-1);
+	LIMIT(x1, 0, term.maxcol-1);
+	LIMIT(x2, 0, term.maxcol-1);
 	LIMIT(y1, 0, term.row-1);
 	LIMIT(y2, 0, term.row-1);
 
@@ -2604,7 +2607,9 @@ tresize(int col, int row)
 {
 	int i, j;
 	int minrow = MIN(row, term.row);
-	int mincol = MIN(col, term.col);
+	// int mincol = MIN(col, term.col);
+	int oldmaxcol = term.maxcol;
+	int newmaxcol = MAX(term.maxcol, col);
 	int *bp;
 	TCursor c;
 
@@ -2637,11 +2642,11 @@ tresize(int col, int row)
 	term.line = xrealloc(term.line, row * sizeof(Line));
 	term.alt  = xrealloc(term.alt,  row * sizeof(Line));
 	term.dirty = xrealloc(term.dirty, row * sizeof(*term.dirty));
-	term.tabs = xrealloc(term.tabs, col * sizeof(*term.tabs));
+	term.tabs = xrealloc(term.tabs, newmaxcol * sizeof(*term.tabs));
 
 	for (i = 0; i < HISTSIZE; i++) {
-		term.hist[i] = xrealloc(term.hist[i], col * sizeof(Glyph));
-		for (j = mincol; j < col; j++) {
+		term.hist[i] = xrealloc(term.hist[i], newmaxcol * sizeof(Glyph));
+		for (j = oldmaxcol; j < newmaxcol; j++) {
 			term.hist[i][j] = term.c.attr;
 			term.hist[i][j].u = ' ';
 		}
@@ -2649,19 +2654,19 @@ tresize(int col, int row)
 
 	/* resize each r w to new width, zero-pad if needed */
 	for (i = 0; i < minrow; i++) {
-		term.line[i] = xrealloc(term.line[i], col * sizeof(Glyph));
-		term.alt[i]  = xrealloc(term.alt[i],  col * sizeof(Glyph));
+		term.line[i] = xrealloc(term.line[i], newmaxcol * sizeof(Glyph));
+		term.alt[i]  = xrealloc(term.alt[i],  newmaxcol * sizeof(Glyph));
 	}
 
 	/* allocate any new rows */
 	for (/* i = minrow */; i < row; i++) {
-		term.line[i] = xmalloc(col * sizeof(Glyph));
-		term.alt[i] = xmalloc(col * sizeof(Glyph));
+		term.line[i] = xmalloc(newmaxcol * sizeof(Glyph));
+		term.alt[i] = xmalloc(newmaxcol * sizeof(Glyph));
 	}
-	if (col > term.col) {
+	if (newmaxcol > term.col) {
 		bp = term.tabs + term.col;
 
-		memset(bp, 0, sizeof(*term.tabs) * (col - term.col));
+		memset(bp, 0, sizeof(*term.tabs) * (newmaxcol - term.col));
 		while (--bp > term.tabs && !*bp)
 			/* nothing */ ;
 		for (bp += tabspaces; bp < term.tabs + col; bp += tabspaces)
@@ -2670,6 +2675,7 @@ tresize(int col, int row)
 	/* update terminal size */
 	term.col = col;
 	term.row = row;
+	term.maxcol = newmaxcol;
 	/* reset scrolling region */
 	tsetscroll(0, row-1);
 	/* make use of the LIMIT in tmoveto */
@@ -2677,11 +2683,11 @@ tresize(int col, int row)
 	/* Clearing both screens (it makes dirty all lines) */
 	c = term.c;
 	for (i = 0; i < 2; i++) {
-		if (mincol < col && 0 < minrow) {
-			tclearregion(mincol, 0, col - 1, minrow - 1);
+		if (oldmaxcol < term.maxcol && 0 < minrow) {
+			tclearregion(oldmaxcol, 0, term.maxcol - 1, minrow - 1);
 		}
-		if (0 < col && minrow < row) {
-			tclearregion(0, minrow, col - 1, row - 1);
+		if (0 < term.maxcol && minrow < row) {
+			tclearregion(0, minrow, term.maxcol - 1, row - 1);
 		}
 		tswapscreen();
 		tcursor(CURSOR_LOAD);
